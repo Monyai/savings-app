@@ -1,0 +1,134 @@
+name: Claude Code Savings App Workflow
+
+# ワークフローのトリガー設定
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # 手動実行を可能にする
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. リポジトリのチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      
+      # 2. Node.js環境のセットアップ（Claude Code用）
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # 3. Flutter環境のセットアップ（アプリ開発用）
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.4'
+          channel: 'stable'
+      
+      # 4. Claude Code環境の設定
+      - name: Setup Claude Code Environment
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL_DEV: ${{ secrets.SLACK_WEBHOOK_URL_DEV }}
+          SLACK_WEBHOOK_URL_ALERTS: ${{ secrets.SLACK_WEBHOOK_URL_ALERTS }}
+          SLACK_WEBHOOK_URL_RELEASES: ${{ secrets.SLACK_WEBHOOK_URL_RELEASES }}
+        run: |
+          echo "🚀 Claude Code環境設定開始"
+          echo "Node.js version: $(node --version)"
+          echo "Flutter version: $(flutter --version | head -1)"
+          echo "環境変数設定完了"
+      
+      # 5. 依存関係のインストール
+      - name: Install dependencies
+        run: |
+          echo "📦 依存関係のインストール"
+          # Flutter依存関係
+          if [ -f "pubspec.yaml" ]; then
+            flutter pub get
+          fi
+          # npm依存関係（もし存在する場合）
+          if [ -f "package.json" ]; then
+            npm install
+          fi
+      
+      # 6. コード品質チェック
+      - name: Run code analysis
+        run: |
+          echo "🔍 コード解析実行"
+          if [ -f "pubspec.yaml" ]; then
+            flutter analyze
+          fi
+      
+      # 7. テストの実行
+      - name: Run tests
+        run: |
+          echo "🧪 テスト実行"
+          if [ -f "pubspec.yaml" ]; then
+            flutter test
+          fi
+      
+      # 8. アプリケーションのビルド
+      - name: Build application
+        run: |
+          echo "🔨 アプリケーションビルド"
+          if [ -f "pubspec.yaml" ]; then
+            # Web版のビルド
+            flutter build web
+            echo "Web版ビルド完了"
+          fi
+      
+      # 9. 成功時のSlack通知
+      - name: Notify Slack - Success
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_DEV }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "text": "✅ *Savings App* - ワークフロー成功",
+              "attachments": [
+                {
+                  "color": "good",
+                  "fields": [
+                    {"title": "Repository", "value": "${{ github.repository }}", "short": true},
+                    {"title": "Branch", "value": "${{ github.ref_name }}", "short": true},
+                    {"title": "Commit", "value": "`${{ github.sha }}`", "short": true},
+                    {"title": "Author", "value": "${{ github.actor }}", "short": true}
+                  ]
+                }
+              ]
+            }' \
+            $SLACK_WEBHOOK_URL
+      
+      # 10. 失敗時のSlack通知
+      - name: Notify Slack - Failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_ALERTS }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "text": "❌ *Savings App* - ワークフロー失敗",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "fields": [
+                    {"title": "Repository", "value": "${{ github.repository }}", "short": true},
+                    {"title": "Branch", "value": "${{ github.ref_name }}", "short": true},
+                    {"title": "Commit", "value": "`${{ github.sha }}`", "short": true},
+                    {"title": "Author", "value": "${{ github.actor }}", "short": true},
+                    {"title": "Workflow", "value": "[View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "short": false}
+                  ]
+                }
+              ]
+            }' \
+            $SLACK_WEBHOOK_URL
