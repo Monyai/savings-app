@@ -10,6 +10,22 @@
     "filesystem": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "./"]
+    },
+    "slack": {
+      "notifications": {
+        "development": {
+          "webhook_url": "${SLACK_WEBHOOK_URL_DEV}",
+          "channel": "${SLACK_CHANNEL_DEV}"
+        },
+        "alerts": {
+          "webhook_url": "${SLACK_WEBHOOK_URL_ALERTS}",
+          "channel": "${SLACK_CHANNEL_ALERTS}"
+        },
+        "releases": {
+          "webhook_url": "${SLACK_WEBHOOK_URL_RELEASES}",
+          "channel": "${SLACK_CHANNEL_RELEASES}"
+        }
+      }
     }
   }
 }

@@ -1,0 +1,45 @@
+name: Development Progress Monitor
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # 2時間毎
+  workflow_dispatch:  # 手動実行可能
+
+jobs:
+  progress-monitor:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Claude Code
+      run: npm install -g @anthropic-ai/claude-code
+
+    - name: Generate Progress Report
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      run: |
+        claude << 'CLAUDE_PROMPT'
+        GitHub MCPとSlack MCPを使用して開発進捗レポートを生成してください。
+
+        分析項目:
+        1. 最近のコミット活動
+        2. PR状況（オープン/マージ/レビュー待ち）
+        3. Issue進捗
+        4. テストカバレッジ推移
+        5. 主要マイルストーン達成状況
+
+        レポート送信先:
+        - Slack #savings-app-dev に詳細レポート
+        - README.md の進捗セクション更新
+
+        緊急対応が必要な項目があれば #savings-app-alerts にも通知
+CLAUDE_PROMPT

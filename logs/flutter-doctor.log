@@ -1,0 +1,55 @@
+[✓] Flutter (Channel stable, 3.32.4, on macOS 15.5 24F74 darwin-x64, locale ja-JP) [187ms]
+    • Flutter version 3.32.4 on channel stable at /usr/local/Caskroom/flutter/3.32.4/flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 6fba2447e9 (29 hours ago), 2025-06-12 19:03:56 -0700
+    • Engine revision 8cd19e509d
+    • Dart version 3.8.1
+    • DevTools version 2.45.1
+
+[✗] Android toolchain - develop for Android devices [116ms]
+    ✗ Unable to locate Android SDK.
+      Install Android Studio from: https://developer.android.com/studio/index.html
+      On first launch it will assist you in installing the Android SDK components.
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+      If the Android SDK has been installed to a custom location, please use
+      `flutter config --android-sdk` to update to that location.
+
+
+[✗] Xcode - develop for iOS and macOS [152ms]
+    ✗ Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.
+      Download at: https://developer.apple.com/xcode/
+      Or install Xcode via the App Store.
+      Once installed, run:
+        sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+        sudo xcodebuild -runFirstLaunch
+    ✗ CocoaPods not installed.
+        CocoaPods is a package manager for iOS or macOS platform code.
+        Without CocoaPods, plugins will not work on iOS or macOS.
+        For more info, see https://flutter.dev/to/platform-plugins
+      For installation instructions, see https://guides.cocoapods.org/using/getting-started.html#installation
+
+[✓] Chrome - develop for the web [43ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[!] Android Studio (not installed) [41ms]
+    • Android Studio not found; download from https://developer.android.com/studio/index.html
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+
+[✓] VS Code (version 1.100.2) [41ms]
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension can be installed from:
+      🔨 https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
+
+[✓] VS Code (version 1.100.3) [40ms]
+    • VS Code at /Users/monyai/Downloads/Visual Studio Code 2.app/Contents
+    • Flutter extension can be installed from:
+      🔨 https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
+
+[✓] Connected device (2 available) [179ms]
+    • macOS (desktop) • macos  • darwin-x64     • macOS 15.5 24F74 darwin-x64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 137.0.7151.104
+
+[✓] Network resources [417ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 3 categories.

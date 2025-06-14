@@ -1,0 +1,77 @@
+name: Claude Code AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Claude Code
+      run: |
+        npm install -g @anthropic-ai/claude-code
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+
+    - name: AI Code Review
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      run: |
+        echo "🤖 Claude Code AI Review Starting..."
+        
+        # PR情報取得
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          PR_NUMBER=${{ github.event.number }}
+          echo "Reviewing PR #$PR_NUMBER"
+          
+          # Claude Code でレビュー実行
+          claude << 'CLAUDE_PROMPT'
+          GitHub MCPを使用してPR #$PR_NUMBER をレビューしてください。
+          
+          チェック項目:
+          1. Flutter/Dart コーディング規約準拠
+          2. Material 3 Design ガイドライン適合
+          3. テストカバレッジ確認
+          4. パフォーマンス影響評価
+          5. セキュリティ脆弱性チェック
+          
+          レビュー完了後、以下を実行:
+          - 適切なコメントでPRレビュー
+          - Slack #savings-app-dev に結果報告
+          
+          重要な問題発見時はSlack #savings-app-alerts にも通知
+CLAUDE_PROMPT
+        fi
+
+    - name: Notify Slack on Success
+      if: success()
+      run: |
+        curl -X POST -H 'Content-type: application/json' \
+        --data '{"text":"✅ AI Review完了: ${{ github.event.head_commit.message || github.event.pull_request.title }}"}' \
+        ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify Slack on Failure  
+      if: failure()
+      run: |
+        curl -X POST -H 'Content-type: application/json' \
+        --data '{"text":"❌ AI Review失敗: ${{ github.event.head_commit.message || github.event.pull_request.title }}"}' \
+        ${{ secrets.SLACK_WEBHOOK_URL }}
